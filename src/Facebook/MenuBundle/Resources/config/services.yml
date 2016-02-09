@@ -1,0 +1,4 @@
+services:
+#    facebook_menu.example:
+#        class: Facebook\MenuBundle\Example
+#        arguments: ["@service_id", "plain_value", %parameter%]

@@ -1,0 +1,3 @@
+facebook_menu_homepage:
+    path:     /
+    defaults: { _controller: FacebookMenuBundle:Default:index }
