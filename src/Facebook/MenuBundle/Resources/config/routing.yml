@@ -1,3 +1,11 @@
 facebook_menu_homepage:
     path:     /
     defaults: { _controller: FacebookMenuBundle:Default:index }
+
+facebook_menu_show:
+    path:     /menuDuJour
+    defaults: { _controller: FacebookMenuBundle:Default:showMenu }
+
+facebook_menu_getToken:
+    path:     /getToken
+    defaults: { _controller: FacebookMenuBundle:FacebookMenu:getToken }
