@@ -25,18 +25,9 @@ class DefaultController extends Controller
     public function showMenuAction()
     {
     	$facebook = new FacebookMenuController();
-
     	if( isset($_SESSION["facebook_access_token"]) && !empty($_SESSION["facebook_access_token"]) ){
-
     		$allMenu = $facebook->getAllMenuContent();
-            
-            $params = [
-                "lilotregal" => $allMenu['lilotregal'],
-                "regalducircuit" => $allMenu['regalducircuit']
-            ];
-
-    		return $this->render('FacebookMenuBundle:Default:menuToday.html.twig' , $params );
-
+    		return $this->render('FacebookMenuBundle:Default:menuToday.html.twig' , ["allMenu" => $allMenu] );
     	}else{
     		return $this->redirect($this->generateUrl("facebook_menu_homepage"));
     	}

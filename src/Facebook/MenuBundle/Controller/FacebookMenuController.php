@@ -17,15 +17,13 @@ class FacebookMenuController extends Controller {
 
 
     const base_url = 'http://localhost:8000';
-
     const fb_parameters = array(
-        "app_id" => "142914352759046",
-        "app_secret" => "3f6ceb59023bf6323c44dae75e2a00fe",
+        "app_id" => "140784586305356",
+        "app_secret" => "dcc09371e6752615cbaeea2e01cbfa45",
         "default_graph_version" => 'v2.5'
     );
 
-    public function getLoginUrl() {
-        
+    public function getLoginUrl() {        
         $fb = new Facebook(self::fb_parameters);        
         $helper = $fb->getRedirectLoginHelper();
         $loginUrl = $helper->getLoginUrl( self::base_url . '/app_dev.php/getToken', ['email']);
@@ -64,6 +62,7 @@ class FacebookMenuController extends Controller {
     public function getMenuList( $posts , $title_pattern , $msg_separator){
         $latest_menus = array();
 
+        //Get local date
         $day = array("dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"); 
         $month = array("janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"); 
         $date = explode('|', date("w|d|n|Y"));
@@ -74,14 +73,20 @@ class FacebookMenuController extends Controller {
         foreach( $posts as $key => $post){
 
             if (stripos($post->message, $title_pattern ) !== false) {
-                $exploded_message = explode($msg_separator, $post->message, 2);
-                $title = $exploded_message[0];
-                $list_menu = nl2br( $exploded_message[1] );
+                //Get title and list of dish
+                $message_array = explode($msg_separator, $post->message, 2);
+                $title = $message_array[0];
+                $list_menu = nl2br( $message_array[1] );
                 $list_menu = preg_replace('/<br \/>/', '', $list_menu, 1);
 
+                //Check if it's a today menu
                 $date_on_menu = $this->wd_remove_accents( trim( str_replace( $title_pattern , "", $title) ) );
+                $is_today_menu = false;
+                if (stripos( $date_on_menu ,  $today ) !== false){
+                      $is_today_menu = true;
+                }                
                 
-                
+                //Search fav dish
                 $wanted_fav_dish = array("Poulet à la crème", "Rougail saucisse");
                 $raw_menu = $this->wd_remove_accents($list_menu);
                 $founded_fav_dish = array();
@@ -92,18 +97,22 @@ class FacebookMenuController extends Controller {
                     }
                 }
                 
+                //Add content menu in array             
                 $content_array = [
                     "title" => $title,
                     "list_menu" => $list_menu,
                     "full_picture" => $post->full_picture,
-                    "is_today_menu" => ($date_on_menu == $today),
+                    "is_today_menu" => $is_today_menu,
                     "founded_fav_dish" => $founded_fav_dish
                 ];
                 array_push($latest_menus, $content_array);
+
+                //Check number of menu stored
+                if(count($latest_menus) >= 3){
+                    break;
+                }
             }
-            if(count($latest_menus) >= 3){
-                break;
-            }
+            
         }
 
         return $latest_menus;
@@ -111,20 +120,29 @@ class FacebookMenuController extends Controller {
 
     public function getAllMenuContent(){
         $fb = new Facebook(self::fb_parameters);
-
         $accessToken = $_SESSION["facebook_access_token"];  
         
+        //Get raw  L'lilôt Régal menu
         $request1 = $fb->get('/lilotregal/posts?fields=message,full_picture', $accessToken);
         $rawMenu1 = json_decode($request1->getBody()) -> data;
 
+        //Get raw  Le régal du circuit menu
         $request2 = $fb->get('/649823778452363/posts?fields=message,full_picture', $accessToken);
-        $rawMenu2 = json_decode($request2->getBody()) -> data;         
+        $rawMenu2 = json_decode($request2->getBody()) -> data; 
 
-        $all_menu=[
-            "lilotregal" => $this -> getMenuList( $rawMenu1 , "Menu du" , ":"),
-            "regalducircuit" => $this -> getMenuList( $rawMenu2 , "Repas du jour" , "\n")
+        
+        $lilotregal = [
+            "resto_name" => " L'lilôt Régal ",
+            "content" => $this -> getMenuList( $rawMenu1 , "Menu du" , ":")
         ];
 
+        $regalducircuit = [
+            "resto_name" => " Le régal du circuit ",
+            "content" => $this -> getMenuList( $rawMenu2 , "Repas du jour" , "\n")
+        ];       
+
+        //Return final menu content
+        $all_menu=[$lilotregal , $regalducircuit ];
         return $all_menu; 
     }
 

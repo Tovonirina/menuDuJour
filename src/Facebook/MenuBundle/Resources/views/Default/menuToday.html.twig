@@ -1,64 +1,47 @@
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title> Menu Du Jour </title>
-        {% block stylesheets %}
-    		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    		<link rel="stylesheet" href="{{ asset('bundles/menu/css/menu.css') }}" type="text/css"/>
-  		{% endblock %}
-    </head>
-    <body>
+
+{% extends "FacebookMenuBundle::layout.html.twig" %}
+
+{% block title %} Menu du jour{% endblock %}
+
+{% block body %}
         <div id="content">
-           	<h1>L'lilôt Régal</h1>
+
+        	{% for data in allMenu %}
+           	<h1>{{data.resto_name}}</h1>
            	<div class="row">
-           		{% for menu in lilotregal %}
+           		{% for menu in data.content %}
 	                <div class="col-md-3 menu_content">   
-	                    <h2 >{{ menu.title | raw }} {% if menu.is_today_menu %} Aujourd'hui  {% endif %}</h2>
+	                    <h3> 
+	                    {% if menu.is_today_menu %} 
+	                    	Menu aujourd'hui
+	                    {% else %}
+	                    	{{ menu.title | raw }}
+	                    {% endif %}
+	                    </h3>
 
 	                    {% if menu.founded_fav_dish|length > 0 %}
-			                Spécialement pour vous : 
-			                {% for fav_dish in menu.founded_fav_dish %}
-			                    <b>{{ fav_dish }}</b>
-			                {% endfor %}
+	                    	<p class="alert alert-success">
+	                    		<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+	                    		<strong>
+			                    	Spécialement pour vous :
+					                {% for fav_dish in menu.founded_fav_dish %}
+					                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+					                    {{ fav_dish }}
+					                {% endfor %}
+			                	</strong>
+	                    	</p>
+			                
 			            {% endif %} 
 	                           
-		  				<img src="{{ menu.full_picture }}" alt="thumbs" class="col-xs-4 picture" />
+		  				<img src="{{ menu.full_picture }}" alt="Dish" class="col-xs-4 picture " />
 						<p>
 			                {{ menu.list_menu | raw }}		                                 
 			            </p> 
 			            </div>
 	            {% endfor %}
            	</div>
-
-           	<h1>Le régal du circuit</h1>
-           	<div class="row">
-           		{% for menu in regalducircuit %}
-	                <div class="col-md-3 menu_content">   
-	                    <h2 >{{ menu.title | raw }} {% if menu.is_today_menu %} Aujourd'hui  {% endif %}</h2>
-
-	                    {% if menu.founded_fav_dish|length > 0 %}
-			                Spécialement pour vous : 
-			                {% for fav_dish in menu.founded_fav_dish %}
-			                    <b>{{ fav_dish }}</b>
-			                {% endfor %}
-			            {% endif %} 
-	                           
-		  				<img src="{{ menu.full_picture }}" alt="thumbs" class="col-xs-4 picture" />
-						<p>
-			                {{ menu.list_menu | raw }}		                                 
-			            </p> 
-			            </div>
-	            {% endfor %}
-           	</div>
+           	{% endfor %}
             
                 
         </div>
-
-        {% block javascripts %}
-    		{# Ajoutez ces lignes JavaScript si vous comptez vous servir des fonctionnalités du bootstrap Twitter #}
-    		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  		{% endblock %}
-
-    </body>
-</html>
+{% endblock %}
